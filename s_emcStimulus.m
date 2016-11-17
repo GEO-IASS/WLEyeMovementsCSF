@@ -9,44 +9,20 @@
 %% Init Parameters
 ieInit;
 
-%% Create display model
-% ppi    = 500;          % points per inch
-% sensorFov = [.15 .15]; % field of view of retina
-
-% % compute number of pixels in image
-% imgSz  = round(tand(imgFov)*vDist*(ppi/dpi2mperdot(1,'m')));
-% 
-% % compute actual fov of image, should be very close to desired fov
-% imgFov = atand(max(imgSz)/ppi/(1/dpi2mperdot(1,'m'))/vDist);
-% 
-% % Create virtual display
-% display = displayCreate('LCD-Apple', 'dpi', ppi);
-
 %% Create scenes
 
 % To create each oiSequence we need two types of scenes: one with a
 % constant image and one with a time-varying presentation of the stimulus.
-%
-% We also want a pair of oiSequences, one for the offset and another with
-% no offset.  We estimate the probability of discrimination by comparing
-% these two sequences.
-%
-
-% Init scene cell array.  The background is constant and used for both of
-% the oiSequences.  The two line scenes are added to the background.  One
-% of the scenes has an offset and the other is a continuous line
-%
-% scene{1} - one aligned line
-% scene{2} - two line segments with 1 pixel offset
-% scene{3} - uniform background
 scene = cell(2, 1);
 
 clear params
 params.freq =  10; % spatial frequencies of 1 and 5
-params.contrast = 0.6; % contrast of the two frequencies
+params.contrast = 0.9; % contrast of the two frequencies
 params.ang  = [0, 0]; % orientations
 params.ph  = [0 0]; % phase
+params.GaborFlag = 0.25;
 scene{1} = sceneCreate('harmonic',params);
+
 scene{1} = sceneSet(scene{1},'name',sprintf('F %d',params.freq));
 ieAddObject(scene{1});
 
@@ -111,26 +87,36 @@ oiHarmonicSeq = oiSequence(OIs{2}, OIs{1}, ...
     'composition', 'blend');
 oiHarmonicSeq.visualize('format','movie');
 
-%%
+%% Set up the photon absorptions from the sequence
+
 cMosaic = coneMosaic;
 cMosaic.integrationTime = 0.002;
-cMosaic.setSizeToFOV(1);
+cMosaic.setSizeToFOV(0.5);
 cMosaic.emGenSequence(tSamples);
 cMosaic.compute(oiHarmonicSeq);
+
+%% Create the current with and without noise
+
+cMosaic.os.noiseFlag = false;
 cMosaic.computeCurrent;
 cMosaic.window;
 
+%% These are the impulse response functions
+
+cMosaic.plot('os current filters');
+
 %% Adjust the eye movement parameters
 
-% How to adjust
-em = emCreate;
-em.emFlag = [1 1 1];
-em.tremor.amplitude = 0.02;
-cMosaic.emGenSequence(tSamples,'em',em);
-cMosaic.plot('eye movement path');
+% Pretty big tremor
+em = emCreate;     % Create an eye movement object
+em.emFlag = [1 1 1];  % Make sure tremor, draft and saccade are all on
+em.tremor.amplitude = 0.02;  % Set the big amplitude
+cMosaic.emGenSequence(tSamples,'em',em);  % Generate the sequence
+
+cMosaic.plot('eye movement path');  % How did we do?
 set(gca,'xlim',[-15 15],'ylim',[-15 15]);
 
-% How to adjust
+% Make the tremor much smaller
 em = emCreate;
 em.emFlag = [1 1 1];
 em.tremor.amplitude = 0.005;
