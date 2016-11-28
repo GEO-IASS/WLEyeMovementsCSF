@@ -16,19 +16,21 @@ ieInit;
 % Set up the timing
 
 % Gaussian onset and offset of the grating
-stimWeights = ieScale(fspecial('gaussian',[1,50],15),0,1);
-% Padded by zeroes
-weights = [zeros(1, 30), stimWeights, zeros(1, 30)];
+weights = ieScale(fspecial('gaussian',[1,100],10),0,1);
+%
+% Have a look at the stimulus amplitude time series
+% vcNewGraphWin; plot(stimWeights);
 
 % This is the field of view of the scene.
 sparams.fov = 0.5;
+sparams.meanluminance = 200;
 
 % Initialize the harmonic parameters structure with default
 % Change entries that are common to uniform and harmonic
 clear params
 for ii=2:-1:1
     params(ii) = harmonicP; 
-    params(ii).GaborFlag = 0.2;
+    params(ii).GaborFlag = 0.15;
     params(ii).freq      = 10;
 end
 
@@ -36,39 +38,52 @@ end
 params(1).contrast  = 0.0;  % contrast of the two frequencies
 
 % params(2) is matched and describes the grating
-params(2).contrast = 0.4;
+params(2).contrast = 0.8;
 
-% The call to create the retinal image sequence
-oisH = oisCreate('harmonic','blend',weights,'hparams',params,'sparams',sparams);
+% The call to create the optical image sequence
+oisH = oisCreate('harmonic','blend',weights,'tparams',params,'sparams',sparams);
 
 % Have a look, though the code here is not that great yet so the look is
 % only approximate.
 oisH.visualize;
 
+% oisH.timeStep
+
 %% Now, make the cone mosaic and compute absorptions and current
 
 fov = oiGet(oisH.oiFixed,'fov');
-tSamples = oisH.length;
+emSamples = oisH.length;
 
 cMosaic = coneMosaic;
-cMosaic.integrationTime = 0.001;
-cMosaic.setSizeToFOV(fov);
+cMosaic.noiseFlag = true;
+cMosaic.integrationTime = 0.005;
+cMosaic.setSizeToFOV(0.5*fov);
 
-% Possibly, we should control the eye movement sequence
+% The number of eye movement samples should extend as long as the oisH
+% So these should be equal
+%
+%   tSamples * cMosaic.integrationTime = oisH.length*oisH.timeStep
+%
+% 
+tSamples = floor(oisH.length*oisH.timeStep/cMosaic.integrationTime);
 cMosaic.emGenSequence(tSamples);
 
 % Compute and then look
 cMosaic.compute(oisH);
 cMosaic.window;
 
-% Compute and look
-cMosaic.os.noiseFlag = true;
-cMosaic.computeCurrent;
-cMosaic.window;
+fprintf('Spatial frequency %.1f cpd\n',params(ii).freq/sparams.fov);
+
 
 %% Create the current with and without noise
 
 cMosaic.os.noiseFlag = false;
+cMosaic.computeCurrent;
+cMosaic.window;
+
+
+%% Compute and look at the current
+cMosaic.os.noiseFlag = true;
 cMosaic.computeCurrent;
 cMosaic.window;
 
