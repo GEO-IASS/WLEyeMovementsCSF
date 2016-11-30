@@ -16,7 +16,7 @@ ieInit;
 % Set up the timing
 
 % Gaussian onset and offset of the grating
-weights = ieScale(fspecial('gaussian',[1,100],10),0,1);
+tSeries = ieScale(fspecial('gaussian',[1,100],10),0,1);
 %
 % Have a look at the stimulus amplitude time series
 % vcNewGraphWin; plot(stimWeights);
@@ -41,7 +41,7 @@ params(1).contrast  = 0.0;  % contrast of the two frequencies
 params(2).contrast = 0.8;
 
 % The call to create the optical image sequence
-oisH = oisCreate('harmonic','blend',weights,'tparams',params,'sparams',sparams);
+oisH = oisCreate('harmonic','blend',tSeries,'tparams',params,'sparams',sparams);
 
 % Have a look, though the code here is not that great yet so the look is
 % only approximate.
@@ -56,7 +56,7 @@ emSamples = oisH.length;
 
 cMosaic = coneMosaic;
 cMosaic.noiseFlag = true;
-cMosaic.integrationTime = 0.005;
+cMosaic.integrationTime = 0.001;
 cMosaic.setSizeToFOV(0.5*fov);
 
 % The number of eye movement samples should extend as long as the oisH
@@ -77,13 +77,13 @@ fprintf('Spatial frequency %.1f cpd\n',params(ii).freq/sparams.fov);
 
 %% Create the current with and without noise
 
-cMosaic.os.noiseFlag = false;
+cMosaic.os.noiseFlag = true;
 cMosaic.computeCurrent;
 cMosaic.window;
 
 
 %% Compute and look at the current
-cMosaic.os.noiseFlag = true;
+cMosaic.os.noiseFlag = false;
 cMosaic.computeCurrent;
 cMosaic.window;
 
