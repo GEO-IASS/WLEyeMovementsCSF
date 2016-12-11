@@ -34,7 +34,7 @@ emFlag = emGet(em, 'em flag');
 pos = zeros(nFrames, 2);
 
 %% generate eye movement for tremor
-% if emFlag(1)
+if emFlag(1)
 %     % Load parameters
 %      amplitude  = emGet(em, 'tremor amplitude', 'cones/sample');
 %      interval   = emGet(em, 'tremor interval');
@@ -60,7 +60,7 @@ pos = zeros(nFrames, 2);
       for i = 1:nFrames
           pos(i,1) =  mod(i,11) - 5;
       end
-%  end
+end
 
 % generate eye movement for drift
 if emFlag(2)
