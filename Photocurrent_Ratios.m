@@ -11,12 +11,12 @@ sparams.fov = 0.5;
 
 % Initialize the harmonic parameters structure with default
 % Change entries that are common to uniform and harmonic
-for a = 1:4
+for a = 1:5
 clear params
 for ii=2:-1:1
     params(ii) = harmonicP; 
     params(ii).GaborFlag = 0.2;
-    params(ii).freq      = 10^a;
+    params(ii).freq      = 10*a;
 end
 
 % params(1) is for the uniform field
@@ -45,7 +45,7 @@ deMeanedMosaic = cMosaic.current-mean(cMosaic.current,3);
 padNumFrames = 2^nextpow2(length(cMosaic.current(1,1,:)));
 Spectra_noMovements = abs(fftshift(fft(deMeanedMosaic,padNumFrames,3)));
 avgSpectrum_noMovements = squeeze(sum(sum(Spectra_noMovements)))./93^2;
-cone_current1 = squeeze(cMosaic.current(40,10,:));
+
 % create em object with movement
 em_move = emCreate;     % Create an eye movement object
 em_move.emFlag = [1 0 0];  % Make sure tremor, draft and saccade are all on
@@ -60,12 +60,7 @@ avgSpectrum_withMovements = squeeze(sum(sum(Spectra_withMovements)))./93^2;
 
 avgSpectraAmp = sum(sum(Spectra_withMovements./Spectra_noMovements))./93^2;
 figure
-plot(squeeze(avgSpectraAmp(64:128)))
-str = sprintf('spatial freq = %d',10^a);
+plot(squeeze(avgSpectraAmp(64:128))) % plot positive frequency ratios
+str = sprintf('spatial freq = %d',10*a);
 title(str);
 end
-figure
-hold on
-plot(squeeze(Spectra_noMovements(10,10,:)))
-plot(squeeze(Spectra_withMovements(10,10,:)))
-hold off
