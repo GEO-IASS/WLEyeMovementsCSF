@@ -1,4 +1,5 @@
-%%
+%% Some thoughts
+
 ieInit;
 
 %% Gaussian onset and offset of the grating
@@ -49,8 +50,15 @@ cMosaic.setSizeToFOV(fov);
 em_noMovement = emCreate;     % Create an eye movement object
 em_noMovement.emFlag = [0 0 0];  % Make sure tremor, draft and saccade are all off
 cMosaic.emGenSequence(tSamples,'em',em_noMovement);  % Generate the sequence
+cMosaic.name = 'No em';
+
+% Takes about 35 sec on my computer
+tic
 cMosaic.compute(oisH);
 cMosaic.computeCurrent;
+toc
+
+% Have a look
 cMosaic.window;
 
 %% Create em object with horizontal eye movements
@@ -60,12 +68,22 @@ x = round(emA*sin(2*pi*emF*(1:tSamples)/tSamples));
 % vcNewGraphWin; plot(x);
 y = zeros(size(x(:)));
 cMosaic.emPositions = [x(:),y(:)]; 
+cMosaic.name = 'Horizontal em';
 
+%% Now recompute
+
+% Takes about 35 sec on my computer
+tic
 cMosaic.compute(oisH);
 cMosaic.computeCurrent;
+toc
+
+% Not sure what to do to bring up two separate window.
+% I need to figure that out.  
 cMosaic.window;
 
-%%
+%% Haven't looked here (BW)
+
 deMeanedMosaic = cMosaic.current-mean(cMosaic.current,3);
 padNumFrames = 2^nextpow2(length(cMosaic.current(1,1,:)));
 Spectra_noMovements = abs(fftshift(fft(deMeanedMosaic,padNumFrames,3)));
