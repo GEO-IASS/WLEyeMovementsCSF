@@ -57,9 +57,15 @@ if emFlag(1)
 %      pos(tPos, :) = bsxfun(@times,pos(tPos,:), t(indx(:))/sampTime);
 %      pos = pos .* (2*(randn(size(pos))>0)-1); % shuffle the sign
 %      pos = cumsum(pos, 1);
-      for i = 1:nFrames
-          pos(i,1) =  mod(i,11) - 5;
-      end
+      
+    k = 1;
+    for i = 1:nFrames
+          a = mod(i,10);
+          if a == 0
+              k = -k;
+          end
+          pos(i,1) =  k*(a - 5);
+    end
 end
 
 % generate eye movement for drift

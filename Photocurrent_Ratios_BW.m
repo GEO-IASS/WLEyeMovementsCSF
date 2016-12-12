@@ -15,8 +15,8 @@ freq = [2 30 40];   % One to check that everything makes sense and two high
 %%
 % Initialize the harmonic parameters structure with default
 % Change entries that are common to uniform and harmonic
-% for a = 1:length(freq)
-a = 1;
+for a = 1:length(freq)
+
 clear params
 for ii=2:-1:1
     params(ii) = harmonicP; 
@@ -104,7 +104,7 @@ avgSpectrum_withMovements = squeeze(sum(sum(Spectra_withMovements)))./93^2;
 avgSpectraAmp = sum(sum(Spectra_withMovements./Spectra_noMovements))./93^2;
 figure
 plot(squeeze(avgSpectraAmp(64:128)))
-str = sprintf('spatial freq = %d',10^a);
+str = sprintf('spatial freq = %d',freq(a));
 title(str);
 end
 figure
